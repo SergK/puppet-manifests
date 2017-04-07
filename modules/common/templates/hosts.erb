@@ -1,0 +1,5 @@
+<% @hosts.each do |host, value| -%>
+<%  if value.is_a? String -%>
+<%=   value %> <%= host %>
+<%  end -%>
+<% end -%>

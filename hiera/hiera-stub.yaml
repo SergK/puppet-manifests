@@ -1,0 +1,15 @@
+---
+:backends:
+  - yaml
+:yaml:
+  :datadir: /var/lib/hiera
+:json:
+  :datadir: /var/lib/hiera
+:hierarchy:
+  - nodes/%{::clientcert}
+  - distros/%{::osfamily}
+  - roles/%{::role}
+  - locations/%{::location}
+  - common
+:logger: console
+:merge_behavior: deeper
