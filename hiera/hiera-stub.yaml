@@ -1,15 +1,19 @@
 ---
-:backends:
-  - yaml
-:yaml:
-  :datadir: /var/lib/hiera
-:json:
-  :datadir: /var/lib/hiera
-:hierarchy:
-  - nodes/%{::clientcert}
-  - distros/%{::osfamily}
-  - roles/%{::role}
-  - locations/%{::location}
-  - common
-:logger: console
-:merge_behavior: deeper
+version: 5
+
+defaults:
+  datadir: /var/lib/hiera
+  data_hash: yaml_data
+
+hierarchy:
+  - name: "Per-node data"
+    path: "nodes/%{trusted.certname}.yaml"
+
+  - name: "Per-OS defaults"
+    path: "os/%{facts.os.family}.yaml"
+
+  - name: "Per role"
+    path: "roles/%{::role}.yaml"
+
+  - name: "Common data"
+    path: "common.yaml"

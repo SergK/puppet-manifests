@@ -3,7 +3,7 @@
 set -xe
 
 export DEBIAN_FRONTEND="noninteractive"
-export PUPPET_ETC_DIR="/etc/puppet"
+export PUPPET_ETC_DIR="/etc/puppetlabs/"
 export HIERA_VAR_DIR="/var/lib/hiera"
 
 # check if running it as root
@@ -19,20 +19,27 @@ if [[ ! -d "${PUPPET_ETC_DIR}" ]]; then
 fi
 
 EXPECT_HIERA="$(puppet apply -vd --genconfig | awk '/ hiera_config / {print $3}')"
-if [[ ! -f "${EXPECT_HIERA}" ]]; then
-  echo "File ${EXPECT_HIERA} not found! Copying from hiera-stub.yaml example..."
-  cp ${HIERA_VAR_DIR}/hiera-stub.yaml "${EXPECT_HIERA}"
-fi
+echo "Populating hiera config"
+cp -v ${HIERA_VAR_DIR}/hiera-stub.yaml "${EXPECT_HIERA}"
 
-gem install deep_merge --no-rdoc --no-ri
+/opt/puppetlabs/puppet/bin/gem install deep_merge --no-rdoc --no-ri
 
 # FIXME(skulanov): Replace by puppet-librarian
-for module in puppetlabs-concat puppetlabs-stdlib puppetlabs-apt thias-sysctl; do
+PUPPET_MODULES="\
+  camptocamp-puppetserver \
+  puppetlabs-apt \
+  puppetlabs-concat \
+  puppetlabs-ntp \
+  puppetlabs-stdlib \
+  thias-sysctl \
+  "
+
+for module in ${PUPPET_MODULES}; do
   puppet module install "${module}"
 done
 
 echo FACTER_PUPPET_APPLY="true" FACTER_ROLE="puppetmaster" \
-  puppet apply -vd --detailed-exitcodes ${PUPPET_ETC_DIR}/manifests/site.pp
+  puppet apply -vd --detailed-exitcodes ${PUPPET_ETC_DIR}/code/environments/production/manifests/site.pp
 
 echo puppet agent --enable
 echo puppet agent -vd --no-daemonize --onetime

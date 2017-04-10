@@ -5,24 +5,12 @@
 class common::common (
 ) {
 
-  # $hosts = hiera_hash('::common::hosts', {
-  #   "${::fqdn} ${::hostname}"              => '127.0.1.1',
-  #   'localhost'                            => '127.0.0.1',
-  #   'localhost ip6-localhost ip6-loopback' => '::1',
-  #   'ip6-allnodes'                         => 'ff02::1',
-  #   'ip6-allrouters'                       => 'ff02::2',
-  # })
-
-  # class { '::ntp' :}
-  class { '::puppet::agent' :}
-
-  class { '::system' :}
+  class { '::ntp' :}
 
   ensure_packages([
     'screen',
     'tmux',
   ], { ensure  => latest })
-
 
   case $::osfamily {
     'Debian': {
@@ -50,14 +38,6 @@ class common::common (
     content => "${::fqdn}\n",
     notify  => Exec['/bin/hostname -F /etc/hostname'],
   }
-
-  # file { '/etc/hosts' :
-  #   ensure  => 'present',
-  #   owner   => 'root',
-  #   group   => 'root',
-  #   mode    => '0644',
-  #   content => template('common/hosts.erb'),
-  # }
 
   exec { '/bin/hostname -F /etc/hostname' :
     subscribe   => File['/etc/hostname'],
